@@ -41,9 +41,20 @@ pipeline {
 
     stage("Static code analysis by sonar") {
       steps{
+      withSonarQubeEnv("owasp_sonar"){
       sh "./gradlew sonarqube -Dsonar.host.url=http://localhost:9000 -Dsonar.login=8a88f667d8d71bc776ea1399bd21d70b6818484e"
+          }
         }
       }
+
+      stage("Quality Gate") {
+              steps {
+                timeout(time: 1, unit: 'HOURS') {
+                  waitForQualityGate abortPipeline: true
+                }
+              }
+            }
+
     stage("Build") {
       steps {
         sh "./gradlew build"
@@ -52,51 +63,21 @@ pipeline {
 
     stage("Docker build") {
       steps {
-        sh "docker build -t leszko/calculator:${BUILD_TIMESTAMP} ."
+        sh "docker build -t harshith1989/calculator:${BUILD_TIMESTAMP} ."
       }
     }
 
     stage("Docker login") {
       steps {
-        withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'leszko',
-                          usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
-          sh "docker login --username $USERNAME --password $PASSWORD"
-        }
+          sh "docker login --username harshith1989 --password T@t@1234"
       }
     }
 
     stage("Docker push") {
       steps {
-        sh "docker push leszko/calculator:${BUILD_TIMESTAMP}"
+        sh "docker push harshith1989/calculator:${BUILD_TIMESTAMP}"
       }
     }
 
-    stage("Deploy to staging") {
-      steps {
-        sh "ansible-playbook playbook.yml -i inventory/staging"
-        sleep 60
-      }
-    }
-
-    stage("Acceptance test") {
-      steps {
-	sh "./acceptance_test.sh 192.168.0.166"
-      }
-    }
-
-    // Performance test stages
-
-    stage("Release") {
-      steps {
-        sh "ansible-playbook playbook.yml -i inventory/production"
-        sleep 60
-      }
-    }
-
-    stage("Smoke test") {
-      steps {
-	sh "./smoke_test.sh 192.168.0.115"
-      }
-    }
   }
 }
