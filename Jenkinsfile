@@ -41,9 +41,7 @@ pipeline {
 
     stage("Static code analysis by sonar") {
       steps{
-      sh ./gradlew sonarqube \
-      -Dsonar.host.url=http://localhost:9000 \
-      -Dsonar.login=8a88f667d8d71bc776ea1399bd21d70b6818484e
+      sh "./gradlew sonarqube -Dsonar.host.url=http://localhost:9000 -Dsonar.login=8a88f667d8d71bc776ea1399bd21d70b6818484e"
         }
       }
     stage("Build") {
