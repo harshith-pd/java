@@ -39,13 +39,6 @@ pipeline {
       }
     }
 
-    stage("Static code analysis by sonar") {
-      steps{
-      withSonarQubeEnv("owasp_sonar"){
-      sh "./gradlew sonarqube -Dsonar.host.url=http://172.20.10.2:9000/ -Dsonar.login=8a88f667d8d71bc776ea1399bd21d70b6818484e"
-          }
-        }
-      }
 
 
     stage("Build") {
